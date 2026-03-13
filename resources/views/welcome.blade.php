@@ -2,7 +2,7 @@
 
 <nav>
     @auth
-        <a href="{{ route('batches.index') }}">Go to Batch</a>
+        <a href="{{ route('admin.dashboard') }}">Go to Dashboard</a>
     @else
         <a href="{{ route('login') }}">Log in</a>
         <a href="{{ route('register') }}">Register</a>

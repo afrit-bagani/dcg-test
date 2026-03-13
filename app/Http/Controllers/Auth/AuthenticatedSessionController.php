@@ -17,22 +17,15 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function store(Request $request)
     {
-        // 1. Validate the input
         $credentials = $request->validate([
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        // 2. Attempt to log the user in
-        // The 'attempt' method handles the hashing check (Bcrypt) automatically.
-        // 'remember' (boolean) allows for long-lived session cookies.
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            // Industry Standard: Throw a validation error if credentials fail.
+
             // This automatically redirects back to the login page with error messages.
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
@@ -44,7 +37,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // 4. Redirect to the dashboard
-        return redirect()->intended('/batches.index');
+        return redirect()->route('admin.dashboard');
     }
 
     public function destroy(Request $request)

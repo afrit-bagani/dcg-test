@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Batch extends Model
+class Programme extends Model
 {
     use HasFactory;
-    protected $table = 'batch_master';
-    protected $primaryKey = 'batch_id';
+    protected $table = 'programme_master';
+    protected $primaryKey = 'programme_id';
     protected $fillable = ['code', 'name', 'is_active', 'created_by'];
 }

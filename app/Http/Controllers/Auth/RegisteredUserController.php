@@ -38,6 +38,6 @@ class RegisteredUserController extends Controller
         // 3. Login: Automatically log the user in after registration.
         Auth::login($user);
 
-        return redirect('/batches.index');
+        return redirect('/dashboard');
     }
 }
