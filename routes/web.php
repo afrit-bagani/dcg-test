@@ -72,23 +72,26 @@ Route::middleware('auth')->group(function () {
         // 5. Student Registrations
         Route::prefix('students')->name('student.')->group(function () {
             Route::get('/', [StudentController::class, 'index'])->name('index');
-
-            Route::get('/create', [StudentController::class, 'create'])->name('create');
-            Route::post('/store', [StudentController::class, 'store'])->name('store');
-
-            Route::prefix('{id}')->group(function () {
-                // Tab 1: Personal
-                Route::get("/personal", [StudentController::class, 'editPersonal'])->name('edit.personal');
-                Route::patch("/personal", [StudentController::class, 'updatePersonal'])->name('update.personal');
-
-                // Tab 2: Education
-                Route::get('/education', [StudentController::class, 'editEducation'])->name('edit.education');
-                Route::patch('/education', [StudentController::class, 'updateEducation'])->name('update.education');
-
-                Route::patch('/status', [StudentController::class, 'updateStatus'])->name('updateStatus');
-            });
-
+            Route::patch('/{id}/status', [StudentController::class, 'updateStatus'])->name('index');
             Route::post('/bulk-status', [StudentController::class, 'bulkStatus'])->name('bulkStatus');
+
+            // Tab 1: Basic Information
+            Route::get('/create', [StudentController::class, 'createBasicInfo'])->name('create');
+            Route::post('/store-basic-info', [StudentController::class, 'storeBasicInfo'])->name('basic_info.store');
+            Route::get('/{id}/basic-info', [StudentController::class, 'editBasicInfo'])->name('basic_info.edit');
+            Route::patch('/{id}/basic-info', [StudentController::class, 'updateBasicInfo'])->name('basic_info.update');
+
+            // Tab 2: Paper Selection
+            Route::get('/{id}/paper-selection', [StudentController::class, 'editPaperSelection'])->name('paper_selection.edit');
+            Route::patch('/{id}/paper-selection', [StudentController::class, 'updatePaperSelection'])->name('paper_selection.update');
+
+            // Tab 3: Upload Documents
+            Route::get('/{id}/upload-documents', [StudentController::class, 'editUploadDocs'])->name('upload_docs.edit');
+            Route::patch('/{id}/upload-documents', [StudentController::class, 'updateUploadDocs'])->name('upload_docs.update');
+
+            // Tab 4: Payment Information
+            Route::get('/{id}/payment-info', [StudentController::class, 'editPaymentInfo'])->name('payment_info.edit');
+            Route::patch('/{id}/payment-info', [StudentController::class, 'updatePaymentInfo'])->name('payment_info.update');
         });
     });
 });

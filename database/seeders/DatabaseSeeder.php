@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Batch;
 use App\Models\Course;
-use App\Models\Student;
+use App\Models\StudentBasicInformation;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -50,6 +50,6 @@ class DatabaseSeeder extends Seeder
 
         // We can safely generate 50 batches because the factory logic is heavily randomized
         Batch::factory(55)->create();
-        Student::factory()->count(50)->create();
+        StudentBasicInformation::factory()->count(50)->create();
     }
 }
