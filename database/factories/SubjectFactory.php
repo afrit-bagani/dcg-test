@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Subject>
+ * @extends Factory<Subject>
  */
 class SubjectFactory extends Factory
 {
@@ -64,7 +66,18 @@ class SubjectFactory extends Factory
             'Typography',
         ];
 
+        $course = DB::table('course_master')
+            ->where('is_active', 1)
+            ->inRandomOrder()
+            ->first();
+
+        $courseId = $course->course_id;
+        $programmeId = $course->programme_id;
+
+
         return [
+            'programme_id' => $programmeId,
+            'course_id' => $courseId,
             'code' => strtoupper($this->faker->unique()->lexify('SUB-???')),
             'name' => $this->faker->unique()->randomElement($subjects),
             'internal_full_marks' => 20.00,
@@ -73,7 +86,7 @@ class SubjectFactory extends Factory
             'theory_pass_marks' => 32.00,
             'practical_full_marks' => 20.00,
             'practical_pass_marks' => 8.00,
-            'is_active' => $this->faker->boolean(85),
+            'is_active' => $this->faker->boolean(90),
             'created_by' => $this->faker->numberBetween(1, 5),
             'created_at' => now(),
             'updated_at' => now(),

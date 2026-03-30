@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,7 +16,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->boolean('is_active')->default(true);
-            $table->string('created_by');
+            $table->foreignId('created_by')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -27,7 +26,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->boolean('is_active')->default(true);
-            $table->string('created_by');
+            $table->foreignId('created_by')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -37,7 +36,10 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->boolean('is_active')->default(true);
-            $table->string('created_by');
+
+            // relation
+            $table->foreignId('programme_id')->constrained('programme_master', 'programme_id')->onDelete('restrict');
+            $table->foreignId('created_by')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -53,7 +55,11 @@ return new class extends Migration
             $table->decimal('practical_full_marks', 10, 2)->default(0);
             $table->decimal('practical_pass_marks', 10, 2)->default(0);
             $table->boolean('is_active')->default(true);
-            $table->string('created_by');
+
+            // relation
+            $table->foreignId('programme_id')->constrained('programme_master', 'programme_id')->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained('course_master', 'course_id')->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -62,6 +68,7 @@ return new class extends Migration
             $table->id('student_id');
             $table->string('reg_no')->unique();
             $table->string('name');
+            $table->string('phone_no', 20)->unique();
             $table->string('email')->unique();
 
             $table->foreignId('batch_id')->constrained('batch_master', 'batch_id');
@@ -69,9 +76,10 @@ return new class extends Migration
             $table->foreignId('course_id')->constrained('course_master', 'course_id');
 
             $table->boolean('is_active')->default(1);
-            $table->foreignId('created_by')->constrained('users', 'id');
+            $table->foreignId('created_by')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
+
 
     }
 

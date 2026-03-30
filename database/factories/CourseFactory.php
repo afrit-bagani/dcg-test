@@ -3,10 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Course>
- */
 class CourseFactory extends Factory
 {
     public function definition(): array
@@ -31,7 +29,13 @@ class CourseFactory extends Factory
 
         $courseName = $this->faker->unique()->randomElement($courses);
 
+        $programmeId = DB::table('programme_master')
+            ->where('is_active', 1)
+            ->inRandomOrder()
+            ->value('programme_id');
+
         return [
+            'programme_id' => $programmeId,
             'code' => 'CRS-' . $this->faker->unique()->numerify('####'),
             'name' => $courseName,
             'is_active' => $this->faker->boolean(90),

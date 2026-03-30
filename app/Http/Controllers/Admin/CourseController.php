@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Course\StoreCourseRequest;
+use App\Http\Requests\Course\UpdateCourseRequest;
+use App\Http\Requests\UpdateBulkStatusRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -25,30 +28,40 @@ class CourseController extends Controller
         $bindings = [];
 
         // Search Filter
-        if (! empty($search)) {
-            $whereClauses[] = '(code LIKE ? OR name LIKE ?)';
+        if (!empty($search)) {
+            $whereClauses[] = '(c.code LIKE ? OR c.name LIKE ?)';
             $bindings[] = "%{$search}%";
             $bindings[] = "%{$search}%";
         }
 
         // Status Filter
         if ($statusFilter !== null && $statusFilter !== 'all') {
-            $whereClauses[] = 'is_active = ?';
+            $whereClauses[] = 'c.is_active = ?';
             $bindings[] = $statusFilter;
         }
 
         $whereSql = '';
         if (count($whereClauses) > 0) {
-            $whereSql = 'WHERE '.implode(' AND ', $whereClauses);
+            $whereSql = 'WHERE ' . implode(' AND ', $whereClauses);
         }
 
         $dataBindings = array_merge($bindings, [$perPage, $offset]);
 
         $courses = DB::select(
-            "SELECT * FROM course_master $whereSql ORDER BY course_id DESC LIMIT ? OFFSET ?",
+            "SELECT c.*, p.name as programme_name
+             FROM course_master as c
+             INNER JOIN programme_master as p ON c.programme_id = p.programme_id
+             $whereSql
+             ORDER BY c.course_id DESC
+             LIMIT ? OFFSET ?",
             $dataBindings
         );
-        $totalRecords = DB::selectOne("SELECT COUNT(*) as count FROM  course_master $whereSql", $bindings)->count;
+        $totalRecords = DB::selectOne(
+            "SELECT COUNT(*) as count
+              FROM course_master as c
+              INNER JOIN programme_master as p ON c.programme_id = p.programme_id
+              $whereSql", $bindings
+        )->count;
 
         $paginator = new LengthAwarePaginator(
             $courses,
@@ -58,27 +71,30 @@ class CourseController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
+        $programmes = DB::select('
+        SELECT programme_id, name
+        FROM programme_master
+        WHERE is_active = 1
+        ORDER BY name ASC
+    ');
+
         return view('admin.dashboard', [
             'courses' => $paginator,
+            'programmes' => $programmes,
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCourseRequest $request): RedirectResponse
     {
-        $request->validate([
-            'code' => 'required|string|unique:course_master,code',
-            'name' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
-        ]);
-
         $userId = Auth::id();
         $now = now()->toDateTimeString();
 
         DB::insert(
-            'INSERT INTO course_master (code, name, is_active, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+            'INSERT INTO course_master (code, name, programme_id, is_active, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [
                 $request->code,
                 $request->name,
+                $request->programme_id,
                 $request->is_active,
                 $userId,
                 $now,
@@ -87,28 +103,6 @@ class CourseController extends Controller
         );
 
         return redirect()->route('admin.course.index')->with('Course created successfully');
-    }
-
-    public function update(Request $request, int $id): RedirectResponse
-    {
-        $request->validate([
-            'code' => 'required|string|unique:course_master,code,'.$id.',course_id',
-            'name' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
-        ]);
-
-        DB::update(
-            'UPDATE course_master SET code = ?, name = ?, is_active = ?, updated_at = ? WHERE course_id = ?',
-            [
-                $request->code,
-                $request->name,
-                $request->is_active,
-                now()->toDateTimeString(),
-                $id,
-            ]
-        );
-
-        return redirect()->route('admin.course.index')->with('success', 'Course updated successfully');
     }
 
     public function updateStatus(Request $request, int $id): RedirectResponse
@@ -123,14 +117,25 @@ class CourseController extends Controller
         return redirect()->route('admin.course.index')->with('success', 'Course status updated');
     }
 
-    public function bulkStatus(Request $request): RedirectResponse
+    public function update(UpdateCourseRequest $request, int $id): RedirectResponse
     {
-        $request->validate([
-            'bulk_is_active' => 'required|boolean',
-            'selected_ids' => 'required|array|min:1',
-            'selected_ids.*' => 'integer',
-        ]);
+        DB::update(
+            'UPDATE course_master SET programme_id = ?, code = ?, name = ?, is_active = ?, updated_at = ? WHERE course_id = ?',
+            [
+                $request->programme_id,
+                $request->code,
+                $request->name,
+                $request->is_active,
+                now()->toDateTimeString(),
+                $id,
+            ]
+        );
 
+        return redirect()->route('admin.course.index')->with('success', 'Course updated successfully');
+    }
+
+    public function bulkStatus(UpdateBulkStatusRequest $request): RedirectResponse
+    {
         $isActive = $request->bulk_is_active;
         $now = now()->toDateTimeString();
         $ids = $request->selected_ids;
@@ -141,6 +146,18 @@ class CourseController extends Controller
 
         DB::update("UPDATE course_master SET is_active = ?, updated_at = ? WHERE course_id in ($placeholders)", $bindings);
 
-        return redirect()->route('admin.course.index')->with('success', count($ids).'course status updated');
+        return redirect()->route('admin.course.index')->with('success', count($ids) . 'course status updated');
+    }
+
+    public function getCoursesByProgramme(int $programme_id)
+    {
+        $courses = DB::select('
+        SELECT course_id, name
+        FROM course_master
+        WHERE programme_id = ? AND is_active = 1
+        ORDER BY name ASC
+        ', [$programme_id]);
+
+        return response()->json($courses);
     }
 }

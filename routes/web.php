@@ -30,6 +30,9 @@ Route::middleware('auth')->group(function () {
     // Grouped Dashboard Modules
     Route::prefix('dashboard')->name('admin.')->group(function () {
 
+        Route::get('/api/programmes/{programme_id}/courses', [CourseController::class, 'getCoursesByProgramme'])->name('api.courses');
+
+
         // 1. Batch Master
         Route::prefix('batches')->name('batch.')->group(function () {
             Route::get('/', [BatchController::class, 'index'])->name('index');
@@ -69,9 +72,22 @@ Route::middleware('auth')->group(function () {
         // 5. Student Registrations
         Route::prefix('students')->name('student.')->group(function () {
             Route::get('/', [StudentController::class, 'index'])->name('index');
+
+            Route::get('/create', [StudentController::class, 'create'])->name('create');
             Route::post('/store', [StudentController::class, 'store'])->name('store');
-            Route::patch('/{id}', [StudentController::class, 'update'])->name('update');
-            Route::patch('/{id}/status', [StudentController::class, 'updateStatus'])->name('updateStatus');
+
+            Route::prefix('{id}')->group(function () {
+                // Tab 1: Personal
+                Route::get("/personal", [StudentController::class, 'editPersonal'])->name('edit.personal');
+                Route::patch("/personal", [StudentController::class, 'updatePersonal'])->name('update.personal');
+
+                // Tab 2: Education
+                Route::get('/education', [StudentController::class, 'editEducation'])->name('edit.education');
+                Route::patch('/education', [StudentController::class, 'updateEducation'])->name('update.education');
+
+                Route::patch('/status', [StudentController::class, 'updateStatus'])->name('updateStatus');
+            });
+
             Route::post('/bulk-status', [StudentController::class, 'bulkStatus'])->name('bulkStatus');
         });
     });

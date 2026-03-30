@@ -99,7 +99,7 @@
 <!-- CREATE STUDENT MODAL                       -->
 <!-- ========================================== -->
 <div id="createStudentModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
             <h3 class="text-xl font-extrabold text-gray-800">Register New Student</h3>
@@ -204,7 +204,7 @@
 <!-- EDIT STUDENT MODAL                         -->
 <!-- ========================================== -->
 <div id="editStudentModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         <div
             class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
@@ -311,7 +311,7 @@
 <!-- STATUS MODAL                         -->
 <!-- ========================================== -->
 <div id="statusStudentModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-extrabold text-gray-800">Update Status</h3>

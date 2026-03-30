@@ -30,7 +30,9 @@
 
     <div class="flex gap-2">
         <button type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">Filter</button>
+            class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">
+            Filter
+        </button>
         <a href="{{ route('admin.batch.index') }}"
             class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-bold shadow hover:bg-gray-300 transition">Clear</a>
     </div>
@@ -123,7 +125,7 @@ Create Modal
 --------------------------- --}}
 
 <div id="createModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60  items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60  items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-xl font-extrabold text-gray-800">Create New Batch</h3>
@@ -158,7 +160,9 @@ Create Modal
             </div>
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeCreateModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50 transition">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50 transition">
+                    Cancel
+                </button>
                 <button type="submit"
                     class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700 transition">
                     Create Batch
@@ -173,7 +177,7 @@ Edit Modal
 ------------------------ --}}
 
 <div id="editModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60  items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60  items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-xl font-extrabold text-gray-800">Edit Batch</h3>
@@ -207,10 +211,13 @@ Edit Modal
             </div>
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeEditModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50 transition">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50 transition">
+                    Cancel
+                </button>
                 <button type="submit"
                     class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700 transition">Update
-                    Batch</button>
+                    Batch
+                </button>
             </div>
         </form>
     </div>
@@ -221,7 +228,7 @@ Status Modal
 ------------------------ --}}
 
 <div id="statusModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-extrabold text-gray-800">Update Status</h3>
@@ -242,10 +249,14 @@ Status Modal
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeStatusModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50 transition">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50 transition">
+                    Cancel
+                </button>
                 <button type="submit"
-                    class="bg-amber-500 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-amber-600 transition">Update
-                    Record</button>
+                    class="bg-amber-500 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-amber-600 transition">
+                    Update
+                    Record
+                </button>
             </div>
         </form>
     </div>
@@ -268,7 +279,7 @@ Status Modal
         const modal = document.getElementById('createModal');
 
         modal.classList.remove('hidden');
-        modal.classList.remove('flex');
+        modal.classList.add('flex');
     }
 
     function closeCreateModal() {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,6 +21,7 @@ class StoreStudentRequest extends FormRequest
                 Rule::unique('student_registrations', 'reg_no'),
             ],
             'name' => ['required', 'string', 'max:255'],
+            'phone_no' => ['required', 'string', 'max:10', Rule::unique('student_registrations', 'phone_no')],
             'email' => [
                 'required',
                 'email',
@@ -41,7 +42,6 @@ class StoreStudentRequest extends FormRequest
                 'integer',
                 Rule::exists('course_master', 'course_id')->where('is_active', 1),
             ],
-            'is_active' => ['required', 'boolean'],
         ];
     }
 }

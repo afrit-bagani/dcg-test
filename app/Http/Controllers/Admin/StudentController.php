@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreStudentRequest;
-use App\Http\Requests\UpdateStudentRequest;
+use App\Http\Requests\Student\Personal\UpdatePersonalRequest;
+use App\Http\Requests\Student\StoreStudentRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class StudentController extends Controller
 {
@@ -24,9 +26,10 @@ class StudentController extends Controller
         $whereClauses = [];
         $bindings = [];
 
-        // Search by Name, Email, or Registration Number
-        if (! empty($search)) {
-            $whereClauses[] = '(s.name LIKE ? OR s.email LIKE ? OR s.reg_no LIKE ?)';
+        // Search by Name, Email, Phone, or Registration Number
+        if (!empty($search)) {
+            $whereClauses[] = '(s.name LIKE ? OR s.email LIKE ? OR s.phone_no LIKE ? OR s.reg_no LIKE ?)';
+            $bindings[] = "%{$search}%";
             $bindings[] = "%{$search}%";
             $bindings[] = "%{$search}%";
             $bindings[] = "%{$search}%";
@@ -38,35 +41,34 @@ class StudentController extends Controller
             $bindings[] = $statusFilter;
         }
 
-        // Construct the final WHERE string
         $whereSql = '';
         if (count($whereClauses) > 0) {
-            $whereSql = 'WHERE '.implode(' AND ', $whereClauses);
+            $whereSql = 'WHERE ' . implode(' AND ', $whereClauses);
         }
 
         $dataBindings = array_merge($bindings, [$perPage, $offset]);
 
-        $students = DB::select(
-            "SELECT s.*, 
-                    b.name as batch_name, 
-                    p.code as programme_code, 
-                    c.name as course_name
-                FROM student_registrations s
-                LEFT JOIN batch_master b ON s.batch_id = b.batch_id
-                LEFT JOIN programme_master p ON s.programme_id = p.programme_id
-                LEFT JOIN course_master c ON s.course_id = c.course_id
-                $whereSql 
-                ORDER BY s.student_id DESC 
-                LIMIT ? OFFSET ?",
-            $dataBindings
-        );
+        // Left Joins ensure we still see the student even if a Programme or Batch gets deleted
+        $students = DB::select("
+            SELECT s.*,
+                   b.name as batch_name,
+                   p.code as programme_code,
+                   c.name as course_name
+            FROM student_registrations s
+            LEFT JOIN batch_master b ON s.batch_id = b.batch_id
+            LEFT JOIN programme_master p ON s.programme_id = p.programme_id
+            LEFT JOIN course_master c ON s.course_id = c.course_id
+            $whereSql
+            ORDER BY s.student_id DESC
+            LIMIT ? OFFSET ?
+        ", $dataBindings);
 
-        $totalRecords = DB::selectOne(
-            "SELECT COUNT(*) as count FROM student_registrations s $whereSql",
-            $bindings
-        )->count;
+        $totalRecords = DB::selectOne("
+            SELECT COUNT(*) as count
+            FROM student_registrations s
+            $whereSql
+        ", $bindings)->count;
 
-        // Paginate the results
         $paginator = new LengthAwarePaginator(
             $students,
             $totalRecords,
@@ -75,71 +77,145 @@ class StudentController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $activeBatches = DB::select('SELECT batch_id, name, code FROM batch_master WHERE is_active = 1 ORDER BY name ASC');
-        $activeProgrammes = DB::select('SELECT programme_id, name, code FROM programme_master WHERE is_active = 1 ORDER BY code ASC');
-        $activeCourses = DB::select('SELECT course_id, name, code FROM course_master WHERE is_active = 1 ORDER BY name ASC');
-
-        return view('admin.dashboard', [
+        return view('admin.students.index', [
             'students' => $paginator,
-            'activeBatches' => $activeBatches,
-            'activeProgrammes' => $activeProgrammes,
-            'activeCourses' => $activeCourses,
         ]);
+    }
 
+    public function create()
+    {
+        $programmes = DB::select('SELECT programme_id, code, name FROM programme_master WHERE is_active = 1 ORDER BY name ASC');
+        $batches = DB::select('SELECT batch_id, name FROM batch_master WHERE is_active = 1 ORDER BY name ASC');
+
+        return view('admin.students.create', [
+            'programmes' => $programmes,
+            'batches' => $batches
+        ]);
     }
 
     public function store(StoreStudentRequest $request): RedirectResponse
     {
-
-        $userId = $request->user()?->id;
+        $userId = Auth::id();
         $now = now()->toDateTimeString();
 
-        DB::insert(
-            'INSERT INTO student_registrations (reg_no, name, email, batch_id, programme_id, course_id, is_active, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [
+        DB::insert('INSERT INTO student_registrations
+                   (reg_no, name, phone_no, email, batch_id, programme_id, course_id, is_active, created_by, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ', [
                 $request->reg_no,
                 $request->name,
+                $request->phone_no,
                 $request->email,
                 $request->batch_id,
                 $request->programme_id,
                 $request->course_id,
-                $request->is_active,
+                1,
                 $userId,
                 $now,
                 $now,
             ]
         );
 
-        return redirect()->route('admin.student.index')->with('success', 'Student registered successfully!');
+        $newStudentId = DB::getPdo()->lastInsertId();
+
+        return redirect()->route('admin.student.edit.education', $newStudentId)->with('success', 'Personal info saved. Please assign academic details');
     }
 
-    public function update(UpdateStudentRequest $request, int $id): RedirectResponse
+    /******************************************
+     * Workspace Tab 1: Personal Info
+     ******************************************/
+
+    public function editPersonal(int $id): View
     {
-        $updates = $request->validated();
+        $student = DB::selectOne('SELECT * FROM student_registrations WHERE student_id = ?', [$id]);
 
-        if (empty($updates)) {
-            return back();
-        }
+        if (!$student) abort(404);
 
-        $setClauses = [];
-        $bindings = [];
-
-        foreach ($updates as $column => $value) {
-            $setClauses[] = "$column = ?";
-            $bindings[] = $value;
-        }
-
-        $setClauses[] = 'updated_at = ?';
-        $bindings[] = now()->toDateTimeString();
-        $bindings[] = $id;
-
-        DB::update(
-            'UPDATE student_registrations SET '.implode(', ', $setClauses).' WHERE student_id = ?',
-            $bindings
-        );
-
-        return redirect()->route('admin.student.index')->with('success', 'Student updated successfully!');
+        return view('admin.students.personal', ['student' => $student]);
     }
+
+    public function updatePersonal(UpdatePersonalRequest $request, int $id): RedirectResponse
+    {
+        DB::update('
+            UPDATE student_registrations
+            SET reg_no = ?, name = ?, email = ?, phone_no = ?, updated_at = NOW()
+            WHERE student_id = ?
+        ', [$request->reg_no, $request->name, $request->email, $request->phone_no, $id]);
+
+        return redirect()->back()->with('success', 'Personal information updated.');
+    }
+
+    /******************************************
+     * Tab 2: Education
+     ******************************************/
+
+    public function editEducation(int $id): View
+    {
+        $student = DB::selectOne('SELECT * FROM student_registrations WHERE student_id = ?', [$id]);
+
+        if (!$student) abort(404);
+
+        $programmes = DB::select('SELECT programme_id, code, name FROM programme_master WHERE is_active = 1 ORDER BY name ASC');
+        $batches = DB::select('SELECT batch_id, name FROM batch_master WHERE is_active = 1 ORDER BY name ASC');
+
+        // We will fetch courses dynamically via JS, but we need the current one if it exists
+        $courses = [];
+        if ($student->programme_id) {
+            $courses = DB::select('SELECT course_id, name, code FROM course_master WHERE programme_id = ? AND is_active = 1', [$student->programme_id]);
+        }
+
+        return view('admin.students.education', [
+            'student' => $student,
+            'programmes' => $programmes,
+            'batches' => $batches,
+            'courses' => $courses
+        ]);
+    }
+
+    public function updateEducation(Request $request, int $id): RedirectResponse
+    {
+        $request->validate([
+            'programme_id' => 'required|integer|exists:programme_master,programme_id',
+            'course_id' => 'required|integer|exists:course_master,course_id',
+            'batch_id' => 'required|integer|exists:batch_master,batch_id',
+        ]);
+
+        DB::update('
+            UPDATE student_registrations
+            SET programme_id = ?, course_id = ?, batch_id = ?, updated_at = NOW()
+            WHERE student_id = ?
+        ', [$request->programme_id, $request->course_id, $request->batch_id, $id]);
+
+        return redirect()->back()->with('success', 'Academic details updated.');
+    }
+
+//    public function update(UpdateStudentRequest $request, int $id): RedirectResponse
+//    {
+//        $updates = $request->validated();
+//
+//        if (empty($updates)) {
+//            return back();
+//        }
+//
+//        $setClauses = [];
+//        $bindings = [];
+//
+//        foreach ($updates as $column => $value) {
+//            $setClauses[] = "$column = ?";
+//            $bindings[] = $value;
+//        }
+//
+//        $setClauses[] = 'updated_at = ?';
+//        $bindings[] = now()->toDateTimeString();
+//        $bindings[] = $id;
+//
+//        DB::update(
+//            'UPDATE student_registrations SET ' . implode(', ', $setClauses) . ' WHERE student_id = ?',
+//            $bindings
+//        );
+//
+//        return redirect()->route('admin.student.index')->with('success', 'Student updated successfully!');
+//    }
 
     public function updateStatus(Request $request, int $id): RedirectResponse
     {
@@ -173,6 +249,8 @@ class StudentController extends Controller
             $bindings
         );
 
-        return redirect()->route('admin.student.index')->with('success', count($ids).' studentes updated!');
+        return redirect()->route('admin.student.index')->with('success', count($ids) . ' studentes updated!');
     }
+
+
 }

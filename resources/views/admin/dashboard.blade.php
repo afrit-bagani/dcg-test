@@ -9,7 +9,8 @@
     @elseif(request()->routeIs('admin.subject.*'))
         @include('admin.modules.subject')
     @elseif(request()->routeIs('admin.student.*'))
-        @include('admin.modules.student')
+        {{--        @include('admin.modules.student')--}}
+        @include('admin.students.index')
     @endif
 
 </x-admin-layout>

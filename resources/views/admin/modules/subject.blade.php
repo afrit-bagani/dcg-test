@@ -27,7 +27,9 @@
     </div>
     <div class="flex gap-2">
         <button type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">Filter</button>
+            class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">
+            Filter
+        </button>
         <a href="{{ route('admin.subject.index') }}"
             class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-bold shadow hover:bg-gray-300 transition">Clear</a>
     </div>
@@ -46,7 +48,8 @@
             <option value="0">Set Inactive</option>
         </select>
         <button type="submit"
-            class="bg-slate-800 text-white px-4 py-2 rounded text-sm hover:bg-slate-900 shadow transition">Submit</button>
+            class="bg-slate-800 text-white px-4 py-2 rounded text-sm hover:bg-slate-900 shadow transition">Submit
+        </button>
     </div>
 
     <div class="bg-white rounded shadow-md border border-gray-200 overflow-x-auto">
@@ -59,26 +62,28 @@
                     </th>
                     <th class="py-3 px-2 w-20 font-bold uppercase tracking-wider text-xs">Action</th>
                     <th class="py-3 px-2 w-16 font-bold uppercase tracking-wider text-xs text-center">Sl No</th>
+                    <th class="py-3 px-2 w-16 font-bold uppercase tracking-wider text-xs text-center">Programme</th>
+                    <th class="py-3 px-2 w-16 font-bold uppercase tracking-wider text-xs text-center">Course</th>
                     <th class="py-3 px-4 font-bold uppercase tracking-wider text-xs">Code</th>
                     <th class="py-3 px-4 font-bold uppercase tracking-wider text-xs">Name</th>
-
-                    <!-- NEW COMPACT MARKS COLUMNS -->
                     <th
                         class="py-3 px-4 font-bold uppercase tracking-wider text-xs text-center border-l border-gray-200 bg-gray-50/50">
-                        Internal (F/P)</th>
+                        Internal (Full/Pass)
+                    </th>
                     <th
                         class="py-3 px-4 font-bold uppercase tracking-wider text-xs text-center border-l border-gray-200 bg-gray-50/50">
-                        Theory (F/P)</th>
+                        Theory (Full/Pass)
+                    </th>
                     <th
                         class="py-3 px-4 font-bold uppercase tracking-wider text-xs text-center border-l border-gray-200 bg-gray-50/50">
-                        Practical (F/P)</th>
+                        Practical (Full/Pass)
+                    </th>
 
                     <th class="py-3 px-4 font-bold uppercase tracking-wider text-xs">Status</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @foreach ($subjects as $index => $subject)
-                    <!-- Added Hover Scale & Shadow Animation -->
                     <tr
                         class="transition-all duration-300 ease-in-out hover:bg-slate-200 transform hover:scale-[1.02] hover:shadow-lg hover:z-10 relative bg-white">
                         <td class="py-3 px-4 text-center">
@@ -86,7 +91,7 @@
                                 class="rowCheckboxSubj h-4 w-4 cursor-pointer text-blue-600 rounded border-gray-300">
                         </td>
 
-                        <!-- Tightened Action Column -->
+                        <!-- Action Column -->
                         <td class="py-3 px-2">
                             <div class="flex items-center gap-3">
                                 <button type="button"
@@ -105,7 +110,8 @@
                         <td class="py-3 px-2 font-mono text-gray-500 text-center">
                             {{ ($subjects->currentPage() - 1) * $subjects->perPage() + $loop->iteration }}
                         </td>
-
+                        <td class="py-3 px-2 text-gray-600">{{ $subject->programme_name }}</td>
+                        <td class="py-3 px-2 text-gray-600">{{ $subject->course_name }}</td>
                         <td class="py-3 px-4 font-bold text-gray-800">{{ $subject->code }}</td>
                         <td class="py-3 px-4 text-gray-600">{{ $subject->name }}</td>
 
@@ -145,7 +151,7 @@
 <!-- CREATE SUBJECT MODAL                       -->
 <!-- ========================================== -->
 <div id="createSubjModal"
-    class="fixed inset-0 hidden z-50 bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 hidden z-50 bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
             <h3 class="text-xl font-extrabold text-gray-800">Create Subject</h3>
@@ -155,6 +161,30 @@
 
         <form method="POST" action="{{ route('admin.subject.store') }}" class="p-6 space-y-5">
             @csrf
+
+            {{--            programme name and courses --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Programme <span
+                            class="text-red-500">*</span></label>
+                    <select name="programme_id" id="create_programme_id" required
+                        onchange="fetchCoursesByProgramme(this.value, 'create_course_id')"
+                        class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="" disabled selected>Select Programme...</option>
+                        @foreach ($programmes as $programme)
+                            <option value="{{ $programme->programme_id }}">{{ $programme->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Course <span
+                            class="text-red-500">*</span></label>
+                    <select name="course_id" id="create_course_id" required disabled
+                        class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-gray-100 disabled:text-gray-500">
+                        <option value="" disabled selected>Select Programme First...</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2 sm:col-span-1">
@@ -235,9 +265,12 @@
 
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeCreateSubjModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">
+                    Cancel
+                </button>
                 <button type="submit"
-                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Save</button>
+                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Save
+                </button>
             </div>
         </form>
     </div>
@@ -247,7 +280,7 @@
 <!-- EDIT SUBJECT MODAL                         -->
 <!-- ========================================== -->
 <div id="editSubjModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         <div
             class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 z-10">
@@ -259,6 +292,30 @@
         <form id="editSubjForm" method="POST" action="" class="p-6 space-y-5">
             @csrf
             @method('PATCH')
+
+            {{--            programme name and courses --}}
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Programme <span
+                            class="text-red-500">*</span></label>
+                    <select name="programme_id" id="create_programme_id" required
+                        onchange="fetchCoursesByProgramme(this.value, 'edit_course_id')"
+                        class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="" disabled selected>Select Programme...</option>
+                        @foreach ($programmes as $programme)
+                            <option value="{{ $programme->programme_id }}">{{ $programme->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Course <span
+                            class="text-red-500">*</span></label>
+                    <select name="course_id" id="edit_course_id" required disabled
+                        class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:bg-gray-100 disabled:text-gray-500">
+                        <option value="" disabled selected>Select Programme First...</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2 sm:col-span-1">
@@ -337,9 +394,12 @@
 
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeEditSubjModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">
+                    Cancel
+                </button>
                 <button type="submit"
-                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Update</button>
+                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Update
+                </button>
             </div>
         </form>
     </div>
@@ -349,7 +409,7 @@
 <!-- UPDATE STATUS MODAL                        -->
 <!-- ========================================== -->
 <div id="statusSubjModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-extrabold text-gray-800">Update Status</h3>
@@ -369,10 +429,13 @@
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeStatusSubjModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">
+                    Cancel
+                </button>
                 <button type="submit"
                     class="bg-amber-500 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-amber-600">Update
-                    Record</button>
+                    Record
+                </button>
             </div>
         </form>
     </div>
@@ -455,5 +518,39 @@
 
         modal.classList.remove('flex');
         modal.classList.add('hidden');
+    }
+
+    async function fetchCoursesByProgramme(programmeId, targetDropdownId) {
+        const courseDropdown = document.getElementById(targetDropdownId);
+        courseDropdown.innerHTML = '<option value="" disabled selected>Loading courses...</option>';
+        courseDropdown.disabled = false;
+
+        if (!programmeId) return;
+
+        try {
+            const response = await fetch(`/dashboard/api/programmes/${programmeId}/courses`);
+            if (!response.ok) throw new Error('Network response was not ok')
+            const courses = await response.json();
+
+            courseDropdown.innerHTML = '<option value="" disabled selected>Select course...</option>';
+
+            if (courses.length === 0) {
+                courseDropdown.innerHTML = '<option value="" disabled selected>No courses available</option>';
+                return;
+            }
+
+            courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.course_id;
+                option.textContent = course.name;
+                courseDropdown.append(option);
+            });
+
+            courseDropdown.disabled = false;
+
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+            courseDropdown.innerHTML = '<option value="" disabled selected>Error Loading data</option>';
+        }
     }
 </script>

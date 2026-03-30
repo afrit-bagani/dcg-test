@@ -26,13 +26,15 @@
     </div>
     <div class="flex gap-2">
         <button type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">Filter</button>
+            class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold shadow hover:bg-blue-700 transition">
+            Filter
+        </button>
         <a href="{{ route('admin.course.index') }}"
             class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-bold shadow hover:bg-gray-300 transition">Clear</a>
     </div>
 </form>
 
-{{-- Form for bulk status update  --}}
+{{-- Showing List & Form for bulk status update  --}}
 
 <form action="{{ route('admin.course.bulkStatus') }}" method="POST" id="bulkCourseForm">
     @csrf
@@ -45,7 +47,8 @@
             <option value="0">Set Inactive</option>
         </select>
         <button type="submit"
-            class="bg-slate-800 text-white px-4 py-2 rounded text-sm hover:bg-slate-900 shadow transition">Submit</button>
+            class="bg-slate-800 text-white px-4 py-2 rounded text-sm hover:bg-slate-900 shadow transition">Submit
+        </button>
     </div>
 
     <div class="bg-white rounded shadow-md border border-gray-200 overflow-hidden">
@@ -58,6 +61,7 @@
                     </th>
                     <th class="p-4 font-bold uppercase tracking-wider text-xs">Action</th>
                     <th class="p-4 font-bold uppercase tracking-wider text-xs">Sl No</th>
+                    <th class="p-4 font-bold uppercase tracking-wider text-xs">Programme</th>
                     <th class="p-4 font-bold uppercase tracking-wider text-xs">Code</th>
                     <th class="p-4 font-bold uppercase tracking-wider text-xs">Name</th>
                     <th class="p-4 font-bold uppercase tracking-wider text-xs">Status</th>
@@ -84,6 +88,7 @@
                         <td class="p-4 font-mono text-gray-500 bg-gray-50 text-center w-20">
                             {{ ($courses->currentPage() - 1) * $courses->perPage() + $loop->iteration }}
                         </td>
+                        <td class="p-4 text-gray-800 font-semibold">{{ $course->programme_name }}</td>
                         <td class="p-4 font-bold text-gray-800">{{ $course->code }}</td>
                         <td class="p-4 text-gray-600">{{ $course->name }}</td>
                         <td class="p-4">
@@ -103,7 +108,7 @@
 {{-- Create course modal --}}
 
 <div id="createCourseModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-xl font-extrabold text-gray-800">Create Course</h3>
@@ -112,6 +117,19 @@
         </div>
         <form method="POST" action="{{ route('admin.course.store') }}" class="p-6 space-y-5">
             @csrf
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Programme <span
+                        class="text-red-500">*</span></label>
+                <select name="programme_id" required
+                    class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="" disabled selected>Select Programme...</option>
+                    @foreach ($programmes as $programme)
+                        <option value="{{ $programme->programme_id }}">{{ $programme->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Course Code <span
                         class="text-red-500">*</span></label>
@@ -119,6 +137,7 @@
                     class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter course code">
             </div>
+
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Course Name <span
                         class="text-red-500">*</span></label>
@@ -126,6 +145,7 @@
                     class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter course name">
             </div>
+
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Initial Status</label>
                 <select name="is_active" required
@@ -134,11 +154,15 @@
                     <option value="0">Inactive</option>
                 </select>
             </div>
+
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeCreateCourseModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">
+                    Cancel
+                </button>
                 <button type="submit"
-                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Save</button>
+                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Save
+                </button>
             </div>
         </form>
     </div>
@@ -147,7 +171,7 @@
 {{-- Edit course modal --}}
 
 <div id="editCourseModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-xl font-extrabold text-gray-800">Edit Course</h3>
@@ -157,6 +181,17 @@
         <form id="editCourseForm" method="POST" action="" class="p-6 space-y-5">
             @csrf
             @method('PATCH')
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Programme <span
+                        class="text-red-500">*</span></label>
+                <select name="programme_id" id="edit_programme_id" required
+                    class="border border-gray-300 w-full p-2.5 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="" disabled>Select Programme...</option>
+                    @foreach ($programmes as $programme)
+                        <option value="{{ $programme->programme_id }}">{{ $programme->name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Course Code <span
                         class="text-red-500">*</span></label>
@@ -179,9 +214,12 @@
             </div>
             <div class="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeEditCourseModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">
+                    Cancel
+                </button>
                 <button type="submit"
-                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Update</button>
+                    class="bg-blue-600 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-blue-700">Update
+                </button>
             </div>
         </form>
     </div>
@@ -190,7 +228,7 @@
 {{-- Status Course Modal --}}
 
 <div id="statusCourseModal"
-    class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-60 items-center justify-center backdrop-blur-sm transition-opacity">
+    class="fixed inset-0 z-50 hidden bg-gray-900/60 items-center justify-center backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-0 overflow-hidden">
         <div class="bg-slate-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-extrabold text-gray-800">Update Status</h3>
@@ -210,10 +248,13 @@
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeStatusCourseModal()"
-                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">Cancel</button>
+                    class="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded font-semibold hover:bg-gray-50">
+                    Cancel
+                </button>
                 <button type="submit"
                     class="bg-amber-500 text-white px-5 py-2.5 rounded font-bold shadow hover:bg-amber-600">Update
-                    Record</button>
+                    Record
+                </button>
             </div>
         </form>
     </div>
@@ -250,6 +291,7 @@
         const modal = document.getElementById('editCourseModal');
         const form = document.getElementById('editCourseForm');
 
+        document.getElementById('edit_programme_id').value = course.programme_id;
         document.getElementById('edit_course_code').value = course.code;
         document.getElementById('edit_course_name').value = course.name;
         document.getElementById('edit_course_is_active').value = course.is_active;
