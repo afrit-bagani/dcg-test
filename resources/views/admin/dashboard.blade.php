@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout title="Dashboard">
 
     @if (request()->routeIs('admin.batch.*'))
         @include('admin.modules.batch')
@@ -9,7 +9,6 @@
     @elseif(request()->routeIs('admin.subject.*'))
         @include('admin.modules.subject')
     @elseif(request()->routeIs('admin.student.*'))
-        {{--        @include('admin.modules.student')--}}
         @include('admin.students.index')
     @endif
 

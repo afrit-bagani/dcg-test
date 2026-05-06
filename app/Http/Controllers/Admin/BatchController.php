@@ -114,7 +114,7 @@ class BatchController extends Controller
             [$request->is_active, now()->toDateTimeString(), $id]
         );
 
-        return redirect()->route('admin.batch.index')->with('success', 'Batch status updated!');
+        return redirect()->route('admin.dashboard')->with('success', 'Batch status updated!');
     }
 
     public function bulkStatus(Request $request): RedirectResponse

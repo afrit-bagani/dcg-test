@@ -315,7 +315,6 @@ class StudentController extends Controller
                 [$id, $request->amount, $request->transaction_id, $request->payment_date, $request->payment_status]);
         }
 
-        // FINAL REDIRECT: Registration is complete! Send them back to the Directory.
         return redirect()->route('admin.student.index')
             ->with('success', 'Registration completely finalized for ' . $request->transaction_id . '!');
     }

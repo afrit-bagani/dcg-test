@@ -1,13 +1,5 @@
 # University Management System (UMS) - Architecture & Context
 
-## Developer Profile
-
-- Role: Junior Full Stack Developer transitioning to Mid-Level.
-
-- Goal: Build an enterprise-grade application to secure a top-tier engineering role.
-
-- Code Style: Strict, industry-standard, well-commented, "No Shortcuts".
-
 ## Tech Stack
 
 - Backend: Laravel (PHP)

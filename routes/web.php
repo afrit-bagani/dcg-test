@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\StudentRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -19,19 +20,22 @@ Route::middleware('guest')->group(function () {
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    // Public Student Registration
+    Route::get('student', [StudentRegistrationController::class, 'create'])->name('student.register.create');
+    Route::post('student', [StudentRegistrationController::class, 'store'])->name('student.register.store');
 });
 
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::get('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     // Grouped Dashboard Modules
-    Route::prefix('dashboard')->name('admin.')->group(function () {
+    Route::prefix('/dashboard')->name('admin.')->group(function () {
 
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/api/programmes/{programme_id}/courses', [CourseController::class, 'getCoursesByProgramme'])->name('api.courses');
-
 
         // 1. Batch Master
         Route::prefix('batches')->name('batch.')->group(function () {
@@ -72,7 +76,7 @@ Route::middleware('auth')->group(function () {
         // 5. Student Registrations
         Route::prefix('students')->name('student.')->group(function () {
             Route::get('/', [StudentController::class, 'index'])->name('index');
-            Route::patch('/{id}/status', [StudentController::class, 'updateStatus'])->name('index');
+            Route::patch('/{id}/status', [StudentController::class, 'updateStatus'])->name('updateStatus');
             Route::post('/bulk-status', [StudentController::class, 'bulkStatus'])->name('bulkStatus');
 
             // Tab 1: Basic Information

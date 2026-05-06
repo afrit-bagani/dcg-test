@@ -12,10 +12,8 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-
     public function create(): View
     {
-        // 'auth.register' points to resources/views/auth/register.blade.php
         return view('auth.register');
     }
 
